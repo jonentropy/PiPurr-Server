@@ -9,7 +9,6 @@
 #
 #	Tris Linnell
 #		http://canthack.org
-#
 
 from cv2 import *
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
@@ -34,17 +33,9 @@ class myHandler(BaseHTTPRequestHandler):
 			return
 			
 		try:
-			#Open the cat cam
-			camera = VideoCapture(0)
-			
-			#Set image dimensions. v4l and your webcam must support this
-			#camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 640);
-			#camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 480);
-
 			#Capture the image
 			status, image = camera.read()
-			camera.release()
-
+			
 			text = datetime.now().strftime("%H:%M:%S %a %d")
 			textcolour = (120, 120, 120)
  			putText(image, text, (2,20), FONT_HERSHEY_COMPLEX_SMALL, 1.0, textcolour)
@@ -52,7 +43,7 @@ class myHandler(BaseHTTPRequestHandler):
 			if status:
 				#Save image to temp file ready to serve it
 				imwrite("cats.jpeg",image)
-			
+
 				f = open(curdir + sep + 'cats.jpeg') 
 
 				self.send_response(200)
@@ -81,11 +72,19 @@ def Log(msg):
 try:
 	LogFile = open('CatCamServer.log', 'a')
 	logging = True
+
 except Exception, e:
 	print 'Logging disabled, %s' %e
 		
 try:		
-	#Web server to serve the cat pics
+	#Open the cat cam
+	camera = VideoCapture(0)
+			
+	#Set image dimensions. v4l and your webcam must support this
+	camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
+	camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
+			
+	#Create the web server to serve the cat pics
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
 	Log('Cat pic server started on port ' + str(PORT_NUMBER))
 
@@ -94,5 +93,6 @@ try:
 
 except KeyboardInterrupt:
 	Log('Shutting down...')
+	camera.release()
 	LogFile.close()
 	server.socket.close()
