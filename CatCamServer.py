@@ -15,7 +15,25 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from os import curdir, sep
 from datetime import datetime
 
+#Constants
 PORT_NUMBER = 8081
+
+RED = (1,0,0)
+GREEN = (0,1,0)
+BLUE = (0,0,1)
+OFF = (0,0,0)
+
+#For LedBorg lights
+def writeColour(colour):
+    colour = "%d%d%d" % (colour[0], colour[1], colour[2])
+    LedBorg = open('/dev/ledborg', 'w')
+    LedBorg.write(colour)
+    LedBorg.close()
+    
+def flashColor(colour):
+	writeColour(colour[0], colour[1], colour[2])
+	time.sleep(0.5)
+	writeColour(0,0,0)    
 
 #HTTP Server class
 class myHandler(BaseHTTPRequestHandler):	
@@ -33,6 +51,13 @@ class myHandler(BaseHTTPRequestHandler):
 			return
 			
 		try:
+			#Open the cat cam
+			camera = VideoCapture(0)
+			
+			#Set image dimensions. v4l and your webcam must support this
+			camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
+			camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
+	
 			#Capture the image
 			status, image = camera.read()
 			
@@ -68,6 +93,8 @@ def Log(msg):
 	print toLog;
 	if logging:
 		LogFile.write(toLog + '\n')
+
+writeColour(BLUE)
 		
 try:
 	LogFile = open('CatCamServer.log', 'a')
@@ -77,22 +104,16 @@ except Exception, e:
 	print 'Logging disabled, %s' %e
 		
 try:		
-	#Open the cat cam
-	camera = VideoCapture(0)
-			
-	#Set image dimensions. v4l and your webcam must support this
-	camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
-	camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
-			
 	#Create the web server to serve the cat pics
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
 	Log('Cat pic server started on port ' + str(PORT_NUMBER))
 
+	writeColour(OFF)
+	
 	while(True):
 		server.handle_request()	
 
 except KeyboardInterrupt:
 	Log('Shutting down...')
-	camera.release()
 	LogFile.close()
 	server.socket.close()
