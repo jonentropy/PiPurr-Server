@@ -54,11 +54,19 @@ class myHandler(BaseHTTPRequestHandler):
 			
 		try:	
 			#Capture the image
+			camera.release()
+			camera.open(0)
+		
+			#Set image dimensions. v4l and your webcam must support this
+			camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
+			camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
+		
 			status, image = camera.read()
 			
 			text = datetime.now().strftime("%H:%M:%S %a %d")
 			textcolour = (100, 100, 120)
- 			putText(image, text, (2,20), FONT_HERSHEY_COMPLEX_SMALL, 1.0, textcolour)
+ 		
+			putText(image, text, (2,20), FONT_HERSHEY_COMPLEX_SMALL, 1.0, textcolour)
 
 			if status:
 				self.send_response(200)
@@ -98,10 +106,6 @@ except Exception, e:
 try:		
 	#Open the cat cam
 	camera = VideoCapture(0)
-
-	#Set image dimensions. v4l and your webcam must support this
-	camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
-	camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
 
 	#Create the web server to serve the cat pics
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
