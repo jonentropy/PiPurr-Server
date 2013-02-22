@@ -14,6 +14,7 @@ from cv2 import *
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from os import curdir, sep
 from datetime import datetime
+import time
 
 #Constants
 PORT_NUMBER = 8081
@@ -25,15 +26,15 @@ OFF = (0,0,0)
 
 #For LedBorg lights
 def writeColour(colour):
-    colour = "%d%d%d" % (colour[0], colour[1], colour[2])
-    LedBorg = open('/dev/ledborg', 'w')
-    LedBorg.write(colour)
-    LedBorg.close()
+	colour = "%d%d%d" % (colour[0], colour[1], colour[2])
+	LedBorg = open('/dev/ledborg', 'w')
+	LedBorg.write(colour)
+	LedBorg.close()
     
-def flashColor(colour):
-	writeColour(colour[0], colour[1], colour[2])
+def flashColour(colour):
+	writeColour(colour)
 	time.sleep(0.5)
-	writeColour(0,0,0)    
+	writeColour(OFF)    
 
 #HTTP Server class
 class myHandler(BaseHTTPRequestHandler):	
@@ -48,43 +49,34 @@ class myHandler(BaseHTTPRequestHandler):
 		#403 Forbidden HTTP response otherwise
 		if self.path != '/cats.jpeg':
 			self.send_error(403, 'Forbidden')
+			flashColour(RED)
 			return
 			
-		try:
-			#Open the cat cam
-			camera = VideoCapture(0)
-			
-			#Set image dimensions. v4l and your webcam must support this
-			camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
-			camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
-	
+		try:	
 			#Capture the image
 			status, image = camera.read()
 			
 			text = datetime.now().strftime("%H:%M:%S %a %d")
-			textcolour = (120, 120, 120)
+			textcolour = (100, 100, 120)
  			putText(image, text, (2,20), FONT_HERSHEY_COMPLEX_SMALL, 1.0, textcolour)
 
 			if status:
-				#Save image to temp file ready to serve it
-				imwrite("cats.jpeg",image)
-
-				f = open(curdir + sep + 'cats.jpeg') 
-
 				self.send_response(200)
 				self.send_header('Content-type', 'image/jpg')
 				self.end_headers()
-
-				self.wfile.write(f.read())
-				f.close()
+				st, buffger = imencode('.jpg', image)
+				self.wfile.write(buffger.tostring())
+				flashColour(GREEN)
 				return
 			else:
 				#Something went wrong while creating the image,
 				#Send 500 Internal Server Error
 				self.send_error(500, 'Image capture failed')
+				flashColour(RED)
 
 		except IOError:
 			self.send_error(404,'File Not Found: %s' % self.path)
+			flashColour(RED)
 
 logging = False;
 
@@ -104,6 +96,13 @@ except Exception, e:
 	print 'Logging disabled, %s' %e
 		
 try:		
+	#Open the cat cam
+	camera = VideoCapture(0)
+
+	#Set image dimensions. v4l and your webcam must support this
+	camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
+	camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
+
 	#Create the web server to serve the cat pics
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
 	Log('Cat pic server started on port ' + str(PORT_NUMBER))
@@ -111,7 +110,7 @@ try:
 	writeColour(OFF)
 	
 	while(True):
-		server.handle_request()	
+		server.handle_request()
 
 except KeyboardInterrupt:
 	Log('Shutting down...')
