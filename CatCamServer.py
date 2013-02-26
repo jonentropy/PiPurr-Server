@@ -45,6 +45,10 @@ class myHandler(BaseHTTPRequestHandler):
 		
 	#Handler for the GET requests, which is all we are handling...
 	def do_GET(self):
+		#Ignore favicon requests to keep logs clean
+		if self.path == '/favicon.ico':
+			return
+
 		#Only continue if the server is asking for /cats.jpeg. Send
 		#403 Forbidden HTTP response otherwise
 		if self.path != '/cats.jpeg':
