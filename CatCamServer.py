@@ -18,7 +18,7 @@ print "Initialising..."
 
 from cv2 import *
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from os import curdir, sep
+import os
 from datetime import datetime
 import time
 import pygame
@@ -61,9 +61,18 @@ class myHandler(BaseHTTPRequestHandler):
 		
 		elif self.path == '/sound':
 			#play sound
-			pygame.mixer.music.load("sound.wav")
+			pygame.mixer.music.load("sound.ogg")
 			pygame.mixer.music.play()
 			self.send_response(200, "Sound played OK");
+			
+			self.send_header("Content-type", "text/html")
+			self.end_headers()
+			
+			self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+			self.wfile.write("<body><p>Sound played OK!</p>")
+			self.wfile.write("</body></html>")
+			self.wfile.close()
+			
 			flashColour(BLUE);
 		
 		elif self.path == '/cats.jpeg':				
@@ -78,10 +87,10 @@ class myHandler(BaseHTTPRequestHandler):
 			
 				status, image = camera.read()
 				
-				text = datetime.now().strftime("%H:%M:%S %a %d")
-				textcolour = (100, 100, 120)
+				text = datetime.now().strftime("%H:%M:%S %a %d %b")
+				textcolour = (200, 200, 255)
 	 		
-				putText(image, text, (2,20), FONT_HERSHEY_COMPLEX_SMALL, 1.0, textcolour)
+				putText(image, text, (2,20), FONT_HERSHEY_PLAIN, 1.0, textcolour)
 	
 				if status:
 					self.send_response(200)
@@ -89,6 +98,7 @@ class myHandler(BaseHTTPRequestHandler):
 					self.end_headers()
 					st, buffger = imencode('.jpg', image)
 					self.wfile.write(buffger.tostring())
+					self.wfile.close()
 					flashColour(GREEN)
 				else:
 					#Something went wrong while creating the image,
