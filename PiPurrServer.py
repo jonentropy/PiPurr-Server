@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 
 #
-# CatCamServer.py - A very simple webcam server in python
-#	Requires OpenCV for webcam capture.
-#	Saves the image whenever the request is made
-#	for any filename. Intended to work with a simple
-#	Android app that fetches the image.
+# PiPurrServer.py - PiPurr server module.
 #
-#   Also flashes colours on an LEDBorg from www.piborg.org
-#   and can play back a sound on the RPi's connected 
-#   speakers.
+#   Allows remote interaction with your cats.
 #
 #	Tris Linnell
 #		http://canthack.org
@@ -34,7 +28,7 @@ OFF = (0,0,0)
 #For LedBorg lights
 def writeColour(colour):
 	colour = "%d%d%d" % (colour[0], colour[1], colour[2])
-	LedBorg = open('/dev/ledborg', 'w')
+	LedBorg = open("/dev/ledborg", 'w')
 	LedBorg.write(colour)
 	LedBorg.close()
     
@@ -48,18 +42,18 @@ class myHandler(BaseHTTPRequestHandler):
 	
 	#Overload logging function with our own
 	def log_message(self, format, *args):
-		Log(self.address_string() + ' (' + str(self.client_address[0]) + ') ' + format%args);
+		Log(self.address_string() + " (" + str(self.client_address[0]) + ") " + format%args);
 		
 	#Handler for the GET requests, which is all we are handling...
 	def do_GET(self):
 		#Ignore favicon requests to keep logs clean
-		if self.path == '/favicon.ico':
+		if self.path == "/favicon.ico":
 			pass
 
 		#Only continue if the server is asking for a known URI. Send
 		#403 Forbidden HTTP response otherwise.
 		
-		elif self.path == '/sound':
+		elif self.path == "/sound":
 			#play sound
 			pygame.mixer.music.load("sound.ogg")
 			pygame.mixer.music.play()
@@ -75,7 +69,7 @@ class myHandler(BaseHTTPRequestHandler):
 			
 			flashColour(BLUE);
 		
-		elif self.path == '/cats.jpeg':				
+		elif self.path == "/cats.jpeg":				
 			try:	
 				#Capture the image
 				camera.release()
@@ -94,25 +88,25 @@ class myHandler(BaseHTTPRequestHandler):
 	
 				if status:
 					self.send_response(200)
-					self.send_header('Content-type', 'image/jpg')
+					self.send_header("Content-type", "image/jpg")
 					self.end_headers()
-					st, buffger = imencode('.jpg', image)
+					st, buffger = imencode(".jpg", image)
 					self.wfile.write(buffger.tostring())
 					self.wfile.close()
 					flashColour(GREEN)
 				else:
 					#Something went wrong while creating the image,
 					#Send 500 Internal Server Error
-					self.send_error(500, 'Image capture failed')
+					self.send_error(500, "Image capture failed")
 					flashColour(RED)
 	
 			except IOError:
-				self.send_error(404,'File Not Found: %s' % self.path)
+				self.send_error(404, "File Not Found: %s" % self.path)
 				flashColour(RED)
 				
 		else:
 			#Unknown URI
-			self.send_error(403, 'Forbidden')
+			self.send_error(403, "Forbidden")
 			flashColour(RED)	
 
 logging = False;
@@ -121,16 +115,16 @@ def Log(msg):
 	toLog = '[' + datetime.now().strftime("%Y/%m/%d %H:%M:%S") + '] ' + msg
 	print toLog;
 	if logging:
-		LogFile.write(toLog + '\n')
+		LogFile.write(toLog + "\n")
 
 writeColour(BLUE)
 		
 try:
-	LogFile = open('CatCamServer.log', 'a')
+	LogFile = open(os.path.basename(__file__) + "log", "a")
 	logging = True
 
 except Exception, e:
-	print 'Logging disabled, %s' %e
+	print "Logging disabled, %s" %e
 		
 try:		
 	#Open the cat cam
@@ -141,7 +135,7 @@ try:
 	
 	#Create the web server to serve the cat pics
 	server = HTTPServer(('', PORT_NUMBER), myHandler)
-	Log('Cat pic server started on port ' + str(PORT_NUMBER))
+	Log("Server started on port " + str(PORT_NUMBER))
 
 	writeColour(OFF)
 	
@@ -149,6 +143,6 @@ try:
 		server.handle_request()
 
 except KeyboardInterrupt:
-	Log('Shutting down...')
+	Log("Shutting down...")
 	LogFile.close()
 	server.socket.close()
