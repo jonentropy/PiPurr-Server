@@ -107,6 +107,11 @@ class myHandler(BaseHTTPRequestHandler):
 		else:
 			#Unknown URI
 			self.send_error(403, "Forbidden")
+			Log("Headers in forbidden request:")
+
+			for line in self.headers:
+				Log(line + ": " + self.headers.get(line))
+				
 			flashColour(RED)	
 
 logging = False;
@@ -120,7 +125,7 @@ def Log(msg):
 writeColour(BLUE)
 		
 try:
-	LogFile = open(os.path.basename(__file__) + "log", "a")
+	LogFile = open(os.path.basename(__file__) + ".log", "a")
 	logging = True
 
 except Exception, e:
