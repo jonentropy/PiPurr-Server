@@ -22,7 +22,8 @@ Coming soon:
 * /treat - Treat the cats remotely (will use a PiBorg PicoBorg motor board and some awesome hardware hack!).
 * / - Ajaxy web interface with button controls
 * /live - Video streaming
- 
+
+The meow sound is by Dcrosby at en.wikipedia [CC-BY-SA-3.0 (http://creativecommons.org/licenses/by-sa/3.0/)], from Wikimedia Commons. 
 
 Tris Linnell
 http://canthack.org
