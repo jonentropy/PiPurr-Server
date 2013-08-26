@@ -69,7 +69,7 @@ class myHandler(BaseHTTPRequestHandler):
 			
 			flashColour(BLUE);
 		
-		elif self.path == "/cats.jpeg":				
+		elif "/cats.jpeg" in self.path:				
 			try:	
 				#Capture the image
 				camera.release()
