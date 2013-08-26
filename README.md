@@ -23,7 +23,8 @@ Coming soon:
 * / - Ajaxy web interface with button controls
 * /live - Video streaming
 
-The meow sound is by Dcrosby at en.wikipedia [CC-BY-SA-3.0 (http://creativecommons.org/licenses/by-sa/3.0/)], from Wikimedia Commons. 
+The meow sound is by Dcrosby at en.wikipedia - http://commons.wikimedia.org/wiki/File:Meow.ogg
+Licensed [CC-BY-SA-3.0 ( http://creativecommons.org/licenses/by-sa/3.0/ )].
 
 Tris Linnell
 http://canthack.org
