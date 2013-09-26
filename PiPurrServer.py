@@ -29,7 +29,7 @@ class myHandler(BaseHTTPRequestHandler):
     
     #Override logging function with our own
     def log_message(self, format, *args):
-        Log(self.address_string() + " (" + str(self.client_address[0]) + ") " + format%args);
+        Log(self.address_string() + " (" + str(self.client_address[0]) + ") " + format%args)
         
     #Handler for the GET requests, which is all we are handling...
     def do_GET(self):
@@ -43,7 +43,7 @@ class myHandler(BaseHTTPRequestHandler):
         elif self.path == "/feed":
             #feed cats
             feeder.feed()
-            self.send_response(200, "Fed OK");
+            self.send_response(200, "Fed OK")
             
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -53,13 +53,13 @@ class myHandler(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            ledborg.flashColour(ledborg.BLUE);
+            ledborg.flashColour(ledborg.BLUE)
         
         elif self.path == "/sound":
             #play sound
             pygame.mixer.music.load("sound.ogg")
             pygame.mixer.music.play()
-            self.send_response(200, "Sound played OK");
+            self.send_response(200, "Sound played OK")
             
             self.send_header("Content-type", "text/html")
             self.end_headers()
@@ -69,7 +69,7 @@ class myHandler(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            ledborg.flashColour(ledborg.BLUE);
+            ledborg.flashColour(ledborg.BLUE)
         
         elif "/cats.jpeg" in self.path:             
             try:    
@@ -78,8 +78,8 @@ class myHandler(BaseHTTPRequestHandler):
                 camera.open(0)
             
                 #Set image dimensions. v4l and your webcam must support this
-                camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320);
-                camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240);
+                camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320)
+                camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
             
                 status, image = camera.read()
                 
@@ -116,11 +116,11 @@ class myHandler(BaseHTTPRequestHandler):
                 
             ledborg.flashColour(ledborg.RED)    
 
-logging = False;
+logging = False
 
 def Log(msg):
     toLog = '[' + datetime.now().strftime("%Y/%m/%d %H:%M:%S") + '] ' + msg
-    print toLog;
+    print toLog
     if logging:
         LogFile.write(toLog + "\n")
         
