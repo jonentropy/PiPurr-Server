@@ -20,9 +20,9 @@ OFF = (0,0,0)
 #For LedBorg lights
 def writeColour(colour):
     colour = "%d%d%d" % (colour[0], colour[1], colour[2])
-    LedBorg = open("/dev/ledborg", 'w')
-    LedBorg.write(colour)
-    LedBorg.close()
+    ledBorg = open("/dev/ledborg", 'w')
+    ledBorg.write(colour)
+    ledBorg.close()
     
 def flashColour(colour):
     writeColour(colour)

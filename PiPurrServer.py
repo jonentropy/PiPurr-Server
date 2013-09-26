@@ -25,11 +25,11 @@ import ledborg
 PORT_NUMBER = 8081  
 
 #HTTP Server class
-class myHandler(BaseHTTPRequestHandler):    
+class PiPurrServer(BaseHTTPRequestHandler):    
     
     #Override logging function with our own
     def log_message(self, format, *args):
-        Log(self.address_string() + " (" + str(self.client_address[0]) + ") " + format%args)
+        log(self.address_string() + " (" + str(self.client_address[0]) + ") " + format%args)
         
     #Handler for the GET requests, which is all we are handling...
     def do_GET(self):
@@ -109,23 +109,23 @@ class myHandler(BaseHTTPRequestHandler):
         else:
             #Unknown URI
             self.send_error(403, "Forbidden")
-            Log("Headers in forbidden request:")
+            log("Headers in forbidden request:")
 
             for line in self.headers:
-                Log(line + ": " + self.headers.get(line))
+                log(line + ": " + self.headers.get(line))
                 
             ledborg.flashColour(ledborg.RED)    
 
 logging = False
 
-def Log(msg):
+def log(msg):
     toLog = '[' + datetime.now().strftime("%Y/%m/%d %H:%M:%S") + '] ' + msg
     print toLog
     if logging:
-        LogFile.write(toLog + "\n")
+        logFile.write(toLog + "\n")
         
 try:
-    LogFile = open(os.path.basename(__file__) + ".log", "a")
+    logFile = open(os.path.basename(__file__) + ".log", "a")
     logging = True
 
 except Exception, e:
@@ -139,14 +139,14 @@ try:
     pygame.init()
     
     #Create the web server to serve the cat pics
-    server = HTTPServer(('', PORT_NUMBER), myHandler)
-    Log("Server started on port " + str(PORT_NUMBER))
+    server = HTTPServer(('', PORT_NUMBER), PiPurrServer)
+    log("Server started on port " + str(PORT_NUMBER))
     
     while(True):
         server.handle_request()
 
 except KeyboardInterrupt:
-    Log("Shutting down...")
-    LogFile.close()
+    log("Shutting down...")
+    logFile.close()
     server.socket.close()
     feeder.shutdown()

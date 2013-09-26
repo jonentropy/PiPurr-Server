@@ -32,7 +32,7 @@ GPIO.setup(DRIVE_3, GPIO.OUT)
 GPIO.setup(DRIVE_4, GPIO.OUT)
 
 # Function to set all drives off
-def MotorOff():
+def motorOff():
     global step
     GPIO.output(DRIVE_1, GPIO.LOW)
     GPIO.output(DRIVE_2, GPIO.LOW)
@@ -41,15 +41,15 @@ def MotorOff():
     step = -1
     
 # Function to perform a sequence of steps as fast as allowed
-def MoveStep(count):
+def moveStep(count):
     global step
 
     # Choose direction based on sign (+/-)
     if count < 0:
-        dir = -1
+        direction = -1
         count *= -1
     else:
-        dir = 1
+        direction = 1
 
     # Loop through the steps
     while count > 0:
@@ -58,7 +58,7 @@ def MoveStep(count):
             GPIO.output(DRIVE_4, GPIO.HIGH)
             step = 0
         else:
-            step += dir
+            step += direction
 
         # Wrap step when we reach the end of the sequence
         if step < 0:
@@ -74,13 +74,13 @@ def MoveStep(count):
         count -= 1
     
 def feed():
-    MotorOff()
-    MoveStep(-200) #will be specific to your motor
-    MotorOff()
+    motorOff()
+    moveStep(-200) #will be specific to your motor
+    motorOff()
     
 def shutdown():
-    MotorOff()
+    motorOff()
     GPIO.cleanup()
     
 # shut feeder motor off
-MotorOff()
+motorOff()
