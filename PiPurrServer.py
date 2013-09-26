@@ -18,89 +18,11 @@ import os
 from datetime import datetime
 import time
 import pygame
-import RPi.GPIO as GPIO
-
-GPIO.setmode(GPIO.BCM)
+import feeder
+import ledborg
 
 #Constants
-PORT_NUMBER = 8081
-
-# Set which GPIO pins the drive outputs are connected to
-# for feeder control (stepper motor)
-DRIVE_1 = 4  # Black
-DRIVE_2 = 18 # Green
-DRIVE_3 = 8  # Red
-DRIVE_4 = 7  # Blue
-
-# Tell the system how to drive the stepper
-sequence = [DRIVE_1, DRIVE_3, DRIVE_2, DRIVE_4] # Order for stepping (see data sheet for the stepper motor)
-stepDelay = 0.006                               # Delay between steps
-
-# Set all of the drive pins as output pins
-GPIO.setup(DRIVE_1, GPIO.OUT)
-GPIO.setup(DRIVE_2, GPIO.OUT)
-GPIO.setup(DRIVE_3, GPIO.OUT)
-GPIO.setup(DRIVE_4, GPIO.OUT)
-
-# Function to set all drives off
-def MotorOff():
-    global step
-    GPIO.output(DRIVE_1, GPIO.LOW)
-    GPIO.output(DRIVE_2, GPIO.LOW)
-    GPIO.output(DRIVE_3, GPIO.LOW)
-    GPIO.output(DRIVE_4, GPIO.LOW)
-    step = -1
-    
-# Function to perform a sequence of steps as fast as allowed
-def MoveStep(count):
-    global step
-
-    # Choose direction based on sign (+/-)
-    if count < 0:
-        dir = -1
-        count *= -1
-    else:
-        dir = 1
-
-    # Loop through the steps
-    while count > 0:
-        # Set a starting position if this is the first move
-        if step == -1:
-            GPIO.output(DRIVE_4, GPIO.HIGH)
-            step = 0
-        else:
-            step += dir
-
-        # Wrap step when we reach the end of the sequence
-        if step < 0:
-            step = len(sequence) - 1
-        elif step >= len(sequence):
-            step = 0
-
-        # For this step turn one of the drives off and another on
-        if step < len(sequence):
-            GPIO.output(sequence[step-2], GPIO.LOW)
-            GPIO.output(sequence[step], GPIO.HIGH)
-        time.sleep(stepDelay)
-        count -= 1
-
-# LedBorg colours
-RED = (1,0,0)
-GREEN = (0,1,0)
-BLUE = (0,0,1)
-OFF = (0,0,0)
-
-#For LedBorg lights
-def writeColour(colour):
-    colour = "%d%d%d" % (colour[0], colour[1], colour[2])
-    LedBorg = open("/dev/ledborg", 'w')
-    LedBorg.write(colour)
-    LedBorg.close()
-    
-def flashColour(colour):
-    writeColour(colour)
-    time.sleep(0.5)
-    writeColour(OFF)    
+PORT_NUMBER = 8081  
 
 #HTTP Server class
 class myHandler(BaseHTTPRequestHandler):    
@@ -120,9 +42,7 @@ class myHandler(BaseHTTPRequestHandler):
         
         elif self.path == "/feed":
             #feed cats
-            MotorOff()
-            MoveStep(-200); #will be specific to your motor
-            MotorOff()
+            feeder.feed()
             self.send_response(200, "Fed OK");
             
             self.send_header("Content-type", "text/html")
@@ -133,7 +53,7 @@ class myHandler(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            flashColour(BLUE);
+            ledborg.flashColour(ledborg.BLUE);
         
         elif self.path == "/sound":
             #play sound
@@ -149,7 +69,7 @@ class myHandler(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            flashColour(BLUE);
+            ledborg.flashColour(ledborg.BLUE);
         
         elif "/cats.jpeg" in self.path:             
             try:    
@@ -175,16 +95,16 @@ class myHandler(BaseHTTPRequestHandler):
                     st, buffger = imencode(".jpg", image)
                     self.wfile.write(buffger.tostring())
                     self.wfile.close()
-                    flashColour(GREEN)
+                    ledborg.flashColour(ledborg.GREEN)
                 else:
                     #Something went wrong while creating the image,
                     #Send 500 Internal Server Error
                     self.send_error(500, "Image capture failed")
-                    flashColour(RED)
+                    ledborg.flashColour(ledborg.RED)
     
             except IOError:
                 self.send_error(404, "File Not Found: %s" % self.path)
-                flashColour(RED)
+                ledborg.flashColour(ledborg.RED)
                 
         else:
             #Unknown URI
@@ -194,7 +114,7 @@ class myHandler(BaseHTTPRequestHandler):
             for line in self.headers:
                 Log(line + ": " + self.headers.get(line))
                 
-            flashColour(RED)    
+            ledborg.flashColour(ledborg.RED)    
 
 logging = False;
 
@@ -203,8 +123,6 @@ def Log(msg):
     print toLog;
     if logging:
         LogFile.write(toLog + "\n")
-
-writeColour(BLUE)
         
 try:
     LogFile = open(os.path.basename(__file__) + ".log", "a")
@@ -214,9 +132,6 @@ except Exception, e:
     print "Logging disabled, %s" %e
         
 try:        
-    # shut feeder motor off
-    MotorOff()
-    
     #Open the cat cam
     camera = VideoCapture(0)
 
@@ -226,8 +141,6 @@ try:
     #Create the web server to serve the cat pics
     server = HTTPServer(('', PORT_NUMBER), myHandler)
     Log("Server started on port " + str(PORT_NUMBER))
-
-    writeColour(OFF)
     
     while(True):
         server.handle_request()
@@ -236,5 +149,4 @@ except KeyboardInterrupt:
     Log("Shutting down...")
     LogFile.close()
     server.socket.close()
-    MotorOff()
-    GPIO.cleanup()
+    feeder.shutdown()
