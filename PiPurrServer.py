@@ -121,7 +121,7 @@ class myHandler(BaseHTTPRequestHandler):
         elif self.path == "/feed":
             #feed cats
             MotorOff()
-            MoveStep(200); #will be specific to your motor
+            MoveStep(-200); #will be specific to your motor
             MotorOff()
             self.send_response(200, "Fed OK");
             
