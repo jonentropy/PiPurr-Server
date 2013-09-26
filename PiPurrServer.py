@@ -10,9 +10,11 @@
 #   Tris Linnell
 #       http://canthack.org
 
-print "Initialising..."
+if __name__ == "__main__":
+    print "Initialising..."
 
-from cv2 import *
+import cv2
+import cv
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os
 from datetime import datetime
@@ -21,8 +23,9 @@ import pygame
 import feeder
 import ledborg
 
-#Constants
 PORT_NUMBER = 8081  
+
+logging = False
 
 #HTTP Server class
 class PiPurrServer(BaseHTTPRequestHandler):    
@@ -48,6 +51,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             
+            self.wfile.write("<!DOCTYPE html>")
             self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
             self.wfile.write("<body><p>Fed OK!</p>")
             self.wfile.write("</body></html>")
@@ -64,6 +68,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.send_header("Content-type", "text/html")
             self.end_headers()
             
+            self.wfile.write("<!DOCTYPE html>")
             self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
             self.wfile.write("<body><p>Sound played OK!</p>")
             self.wfile.write("</body></html>")
@@ -86,13 +91,13 @@ class PiPurrServer(BaseHTTPRequestHandler):
                 text = datetime.now().strftime("%H:%M:%S %a %d %b")
                 textcolour = (200, 200, 255)
             
-                putText(image, text, (2,20), FONT_HERSHEY_PLAIN, 1.0, textcolour)
+                cv2.putText(image, text, (2,20), cv2.FONT_HERSHEY_PLAIN, 1.0, textcolour)
     
                 if status:
                     self.send_response(200)
                     self.send_header("Content-type", "image/jpg")
                     self.end_headers()
-                    st, buffger = imencode(".jpg", image)
+                    st, buffger = cv2.imencode(".jpg", image)
                     self.wfile.write(buffger.tostring())
                     self.wfile.close()
                     ledborg.flashColour(ledborg.GREEN)
@@ -116,8 +121,6 @@ class PiPurrServer(BaseHTTPRequestHandler):
                 
             ledborg.flashColour(ledborg.RED)    
 
-logging = False
-
 def log(msg):
     toLog = '[' + datetime.now().strftime("%Y/%m/%d %H:%M:%S") + '] ' + msg
     print toLog
@@ -133,7 +136,7 @@ except Exception, e:
         
 try:        
     #Open the cat cam
-    camera = VideoCapture(0)
+    camera = cv2.VideoCapture(0)
 
     #For sound playback
     pygame.init()
