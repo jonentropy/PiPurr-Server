@@ -105,11 +105,11 @@ class PiPurrServer(BaseHTTPRequestHandler):
                     #Something went wrong while creating the image,
                     #Send 500 Internal Server Error
                     self.send_error(500, "Image capture failed")
-                    ledborg.flashColour(ledborg.RED)
+                    ledborg.flashColour(ledborg.MAGENTA)
     
             except IOError:
                 self.send_error(404, "File Not Found: %s" % self.path)
-                ledborg.flashColour(ledborg.RED)
+                ledborg.flashColour(ledborg.MAGENTA)
                 
         else:
             #Unknown URI
