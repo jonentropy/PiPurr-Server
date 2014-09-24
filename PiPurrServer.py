@@ -57,7 +57,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            ledborg.flashColour(ledborg.BLUE)
+            ledborg.flashColour(ledborg.YELLOW)
         
         elif self.path == "/sound":
             #play sound

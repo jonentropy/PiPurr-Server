@@ -13,6 +13,7 @@ import time
 
 # LedBorg colours
 RED = (1,0,0)
+YELLOW = (1,1,0)
 GREEN = (0,1,0)
 BLUE = (0,0,1)
 OFF = (0,0,0)
