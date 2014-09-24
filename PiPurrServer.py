@@ -37,13 +37,13 @@ class PiPurrServer(BaseHTTPRequestHandler):
     #Handler for the GET requests, which is all we are handling...
     def do_GET(self):
         #Ignore favicon requests to keep logs clean
-        if self.path == "/favicon.ico":
+        if "/favicon.ico" in self.path:
             pass
 
         #Only continue if the server is asking for a known URI. Send
         #403 Forbidden HTTP response otherwise.
         
-        elif self.path == "/feed":
+        elif "/feed" in self.path:
             #feed cats
             feeder.feed()
             self.send_response(200, "Fed OK")
@@ -59,7 +59,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             
             ledborg.flashColour(ledborg.YELLOW)
         
-        elif self.path == "/sound":
+        elif "/sound" in self.path:
             #play sound
             pygame.mixer.music.load("sound.ogg")
             pygame.mixer.music.play()
