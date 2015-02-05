@@ -88,7 +88,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             
                 status, image = camera.read()
                 
-                text = datetime.now().strftime("%H:%M:%S %a %d %b")
+                text = "PiPurr " + datetime.now().strftime("%H:%M:%S %a %d %b")
                 textcolour = (200, 200, 255)
             
                 cv2.putText(image, text, (2,20), cv2.FONT_HERSHEY_PLAIN, 1.0, textcolour)
