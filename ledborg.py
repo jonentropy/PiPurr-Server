@@ -10,10 +10,24 @@
 #       http://canthack.org
 
 import time
+import wiringpi2 as wiringpi
 
-# LedBorg colours. All using "1" and "0",
-# even though the LEDBorg supports up to "2" - 
-# so as not to be too bright!
+wiringpi.wiringPiSetup()
+
+# Set up pins
+PIN_RED = 0
+PIN_GREEN = 2
+PIN_BLUE = 3
+LED_MAX = 100
+
+wiringpi.softPwmCreate(PIN_RED,   0, LED_MAX)
+wiringpi.softPwmCreate(PIN_GREEN, 0, LED_MAX)
+wiringpi.softPwmCreate(PIN_BLUE,  0, LED_MAX)
+wiringpi.softPwmWrite(PIN_RED,   0)
+wiringpi.softPwmWrite(PIN_GREEN, 0)
+wiringpi.softPwmWrite(PIN_BLUE,  0)
+
+# LedBorg colours.
 RED = (1,0,0)
 YELLOW = (1,1,0)
 GREEN = (0,1,0)
@@ -22,13 +36,12 @@ MAGENTA = (1,0,1)
 OFF = (0,0,0)
 
 #For LedBorg lights
-def writeColour(colour):
-    colour = "%d%d%d" % (colour[0], colour[1], colour[2])
-    ledBorg = open("/dev/ledborg", 'w')
-    ledBorg.write(colour)
-    ledBorg.close()
+def setColour(colour):
+    wiringpi.softPwmWrite(PIN_RED,   int(colour[0]  * LED_MAX))
+    wiringpi.softPwmWrite(PIN_GREEN, int(colour[1] * LED_MAX))
+    wiringpi.softPwmWrite(PIN_BLUE,  int(colour[2]  * LED_MAX))
     
 def flashColour(colour):
-    writeColour(colour)
+    setColour(colour)
     time.sleep(0.5)
-    writeColour(OFF)  
+    setColour(OFF)  

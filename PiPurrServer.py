@@ -10,8 +10,11 @@
 #   Tris Linnell
 #       http://canthack.org
 
+import ledborg
+
 if __name__ == "__main__":
     print "Initialising..."
+    ledborg.setColour(ledborg.YELLOW)
 
 import cv2
 import cv
@@ -21,7 +24,6 @@ from datetime import datetime
 import time
 import pygame
 import feeder
-import ledborg
 
 PORT_NUMBER = 8081  
 
@@ -145,6 +147,8 @@ try:
     server = HTTPServer(('', PORT_NUMBER), PiPurrServer)
     log("Server started on port " + str(PORT_NUMBER))
     
+    ledborg.setColour(ledborg.OFF)
+
     while(True):
         server.handle_request()
 
@@ -153,3 +157,4 @@ except KeyboardInterrupt:
     logFile.close()
     server.socket.close()
     feeder.shutdown()
+    ledborg.setColour(ledborg.OFF)
