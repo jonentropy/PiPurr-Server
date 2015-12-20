@@ -34,6 +34,7 @@ GREEN = (0,1,0)
 BLUE = (0,0,1)
 MAGENTA = (1,0,1)
 OFF = (0,0,0)
+WHITE = (1,1,1)
 
 #For LedBorg lights
 def setColour(colour):

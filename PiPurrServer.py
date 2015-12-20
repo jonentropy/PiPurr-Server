@@ -11,6 +11,8 @@
 #       http://canthack.org
 
 import ledborg
+import RPi.GPIO as GPIO
+GPIO.setwarnings(False)
 
 if __name__ == "__main__":
     print "Initialising..."
@@ -25,12 +27,65 @@ import time
 import pygame
 import feeder
 
+GPIO.setmode(GPIO.BCM)
+PIR_PIN = 14
+GPIO.setup(PIR_PIN, GPIO.IN)
+
 PORT_NUMBER = 8081  
 
 logging = False
 
+#Open the cat cam
+camera = cv2.VideoCapture(0)
+
+def captureImage(live):
+    #Capture the image
+    
+    ledborg.setColour(ledborg.WHITE)
+    camera.release()
+    camera.open(0)
+            
+    #Set image dimensions. v4l and your webcam must support this
+    camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320)
+    camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
+            
+    status, image = camera.read()
+    
+    ledborg.setColour(ledborg.OFF)
+    
+    if (live):            
+        text = "PiPurr " + datetime.now().strftime("%H:%M:%S %a %d %b")
+    else:
+        text = "A woo! " + datetime.now().strftime("%H:%M:%S %a %d %b")
+        
+    textcolour = (150, 150, 200)
+            
+    cv2.putText(image, text, (2,20), cv2.FONT_HERSHEY_PLAIN, 1.0, textcolour)
+    st, imagebuffer = cv2.imencode(".jpg", image)
+    
+    return (status, imagebuffer)
+        
+status, motionimage = captureImage(False) # last captured image on motion detction
+
+#Cat detection with PIR
+def catCallback(self):
+    log('Cat detected')
+    global motionimage
+    status, motionimage = captureImage(False)
+
+GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=catCallback)
+
 #HTTP Server class
 class PiPurrServer(BaseHTTPRequestHandler):    
+    
+    def sendCatImage(self, image):
+        self.send_response(200)
+        self.send_header("Content-type", "image/jpg")
+        self.end_headers()
+        
+        self.wfile.write(image.tostring())
+        self.wfile.close()
+        ledborg.flashColour(ledborg.GREEN)
     
     #Override logging function with our own
     def log_message(self, format, *args):
@@ -77,32 +132,17 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.wfile.close()
             
             ledborg.flashColour(ledborg.BLUE)
-        
+            
+        elif "/pir.jpeg" in self.path:              
+            self.sendCatImage(motionimage)
+                    
         elif "/cats.jpeg" in self.path:             
             try:    
-                #Capture the image
-                camera.release()
-                camera.open(0)
-            
-                #Set image dimensions. v4l and your webcam must support this
-                camera.set(cv.CV_CAP_PROP_FRAME_WIDTH, 320)
-                camera.set(cv.CV_CAP_PROP_FRAME_HEIGHT, 240)
-            
-                status, image = camera.read()
-                
-                text = "PiPurr " + datetime.now().strftime("%H:%M:%S %a %d %b")
-                textcolour = (200, 200, 255)
-            
-                cv2.putText(image, text, (2,20), cv2.FONT_HERSHEY_PLAIN, 1.0, textcolour)
+                status, liveImage = captureImage(True)
     
                 if status:
-                    self.send_response(200)
-                    self.send_header("Content-type", "image/jpg")
-                    self.end_headers()
-                    st, buffger = cv2.imencode(".jpg", image)
-                    self.wfile.write(buffger.tostring())
-                    self.wfile.close()
-                    ledborg.flashColour(ledborg.GREEN)
+                    self.sendCatImage(liveImage)
+                    
                 else:
                     #Something went wrong while creating the image,
                     #Send 500 Internal Server Error
@@ -137,8 +177,6 @@ except Exception, e:
     print "Logging disabled, %s" %e
         
 try:        
-    #Open the cat cam
-    camera = cv2.VideoCapture(0)
 
     #For sound playback
     pygame.init()
@@ -158,3 +196,4 @@ except KeyboardInterrupt:
     server.socket.close()
     feeder.shutdown()
     ledborg.setColour(ledborg.OFF)
+    GPIO.cleanup()
