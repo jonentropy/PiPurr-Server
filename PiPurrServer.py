@@ -170,7 +170,7 @@ def log(msg):
         logFile.write(toLog + "\n")
         
 try:
-    logFile = open(os.path.basename(__file__) + ".log", "a")
+    logFile = open(os.path.basename(__file__) + ".log", "a", 0)
     logging = True
 
 except Exception, e:
