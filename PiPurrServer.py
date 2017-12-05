@@ -26,6 +26,7 @@ from datetime import datetime
 import time
 import pygame
 import feeder
+import tv
 
 GPIO.setmode(GPIO.BCM)
 PIR_PIN = 14
@@ -80,7 +81,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
     
     def sendCatImage(self, image):
         self.send_response(200)
-        self.send_header("Content-type", "image/jpg")
+        self.send_header("Content-type", "image/jpeg")
         self.end_headers()
         
         self.wfile.write(image.tostring())
@@ -96,6 +97,67 @@ class PiPurrServer(BaseHTTPRequestHandler):
         #Ignore favicon requests to keep logs clean
         if "/favicon.ico" in self.path:
             pass
+        elif "/tvhdmi1" in self.path:
+            tv.HDMI1()
+            self.send_response(200, "TV HDMI1 sent OK")
+
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            self.wfile.write("<!DOCTYPE html>")
+            self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+            self.wfile.write("<body><p>TV turned to HDMI1!</p>")
+            self.wfile.write("</body></html>")
+            self.wfile.close()
+        elif "/tvhdmi2" in self.path:
+            tv.HDMI2()
+            self.send_response(200, "TV HDMI2 sent OK")
+
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            self.wfile.write("<!DOCTYPE html>")
+            self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+            self.wfile.write("<body><p>TV turned to HDMI2</p>")
+            self.wfile.write("</body></html>")
+            self.wfile.close()
+        elif "/tvhdmi3" in self.path:
+            tv.HDMI3()
+            self.send_response(200, "TV HDMI3 sent OK")
+
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            self.wfile.write("<!DOCTYPE html>")
+            self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+            self.wfile.write("<body><p>TV turned to HDMI3!</p>")
+            self.wfile.write("</body></html>")
+            self.wfile.close()
+        elif "/tvhdmi4" in self.path:
+            tv.HDMI4()
+            self.send_response(200, "TV HDMI4 sent OK")
+
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            self.wfile.write("<!DOCTYPE html>")
+            self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+            self.wfile.write("<body><p>TV turned to HDMI4!</p>")
+            self.wfile.write("</body></html>")
+            self.wfile.close()
+        elif "/tvoff" in self.path:
+            # Turn TV off
+            tv.tvOff()
+            self.send_response(200, "TV off sent OK")
+
+            self.send_header("Content-type", "text/html")
+            self.end_headers()
+
+            self.wfile.write("<!DOCTYPE html>")
+            self.wfile.write("<html><head><title>" + os.path.basename(__file__) + "</title></head>")
+            self.wfile.write("<body><p>TV turned off!</p>")
+            self.wfile.write("</body></html>")
+            self.wfile.close()
 
         #Only continue if the server is asking for a known URI. Send
         #403 Forbidden HTTP response otherwise.
@@ -150,7 +212,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
                     ledborg.flashColour(ledborg.MAGENTA)
     
             except IOError:
-                self.send_error(404, "File Not Found: %s" % self.path)
+                self.send_error(500, "IOError: %s" % self.path)
                 ledborg.flashColour(ledborg.MAGENTA)
                 
         else:
