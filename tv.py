@@ -2,10 +2,10 @@ import time
 import socket
 import base64
  
-src     = '10.0.0.2'      # ip of remote (Indigo Server)
+src     = '192.168.86.2'      # ip of remote (Indigo Server)
 mac     = '00-00-00-00-00-00' 	# mac of remote
 remote  = 'Indigo'        			# remote name
-dst     = '10.0.0.7'      # ip of tv
+dst     = '192.168.86.4'      # ip of tv
 app     = 'python'              # iphone..iapp.samsung
 tv      = 'UE32ES6800'          # iphone.UE32ES6800.iapp.samsung
  

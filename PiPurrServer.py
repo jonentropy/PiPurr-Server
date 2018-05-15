@@ -10,34 +10,34 @@
 #   Tris Linnell
 #       http://canthack.org
 
-import ledborg
-import RPi.GPIO as GPIO
-GPIO.setwarnings(False)
+#import ledborg
+#import RPi.GPIO as GPIO
+#GPIO.setwarnings(False)
 
 if __name__ == "__main__":
     print "Initialising..."
-    ledborg.setColour(ledborg.YELLOW)
+ #   ledborg.setColour(ledborg.YELLOW)
 
-import cv2
-import cv
+#import cv2
+#import cv
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import os
 from datetime import datetime
 import time
-import pygame
-import feeder
+#import pygame
+#import feeder
 import tv
 
-GPIO.setmode(GPIO.BCM)
-PIR_PIN = 14
-GPIO.setup(PIR_PIN, GPIO.IN)
+#GPIO.setmode(GPIO.BCM)
+#PIR_PIN = 14
+#GPIO.setup(PIR_PIN, GPIO.IN)
 
 PORT_NUMBER = 8081  
 
 logging = False
 
 #Open the cat cam
-camera = cv2.VideoCapture(0)
+#camera = cv2.VideoCapture(0)
 
 def captureImage(live):
     #Capture the image
@@ -66,7 +66,7 @@ def captureImage(live):
     
     return (status, imagebuffer)
         
-status, motionimage = captureImage(False) # last captured image on motion detction
+#status, motionimage = captureImage(False) # last captured image on motion detction
 
 #Cat detection with PIR
 def catCallback(self):
@@ -74,7 +74,7 @@ def catCallback(self):
     global motionimage
     status, motionimage = captureImage(False)
 
-GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=catCallback)
+#GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=catCallback)
 
 #HTTP Server class
 class PiPurrServer(BaseHTTPRequestHandler):    
@@ -176,7 +176,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            ledborg.flashColour(ledborg.YELLOW)
+       #     ledborg.flashColour(ledborg.YELLOW)
         
         elif "/sound" in self.path:
             #play sound
@@ -193,7 +193,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             self.wfile.write("</body></html>")
             self.wfile.close()
             
-            ledborg.flashColour(ledborg.BLUE)
+      #      ledborg.flashColour(ledborg.BLUE)
             
         elif "/pir.jpeg" in self.path:              
             self.sendCatImage(motionimage)
@@ -209,11 +209,11 @@ class PiPurrServer(BaseHTTPRequestHandler):
                     #Something went wrong while creating the image,
                     #Send 500 Internal Server Error
                     self.send_error(500, "Image capture failed")
-                    ledborg.flashColour(ledborg.MAGENTA)
+     #               ledborg.flashColour(ledborg.MAGENTA)
     
             except IOError:
                 self.send_error(500, "IOError: %s" % self.path)
-                ledborg.flashColour(ledborg.MAGENTA)
+    #            ledborg.flashColour(ledborg.MAGENTA)
                 
         else:
             #Unknown URI
@@ -223,7 +223,7 @@ class PiPurrServer(BaseHTTPRequestHandler):
             for line in self.headers:
                 log(line + ": " + self.headers.get(line))
                 
-            ledborg.flashColour(ledborg.RED)    
+   #         ledborg.flashColour(ledborg.RED)    
 
 def log(msg):
     toLog = '[' + datetime.now().strftime("%Y/%m/%d %H:%M:%S") + '] ' + msg
@@ -241,13 +241,13 @@ except Exception, e:
 try:        
 
     #For sound playback
-    pygame.init()
+#    pygame.init()
     
     #Create the web server to serve the cat pics
     server = HTTPServer(('', PORT_NUMBER), PiPurrServer)
     log("Server started on port " + str(PORT_NUMBER))
     
-    ledborg.setColour(ledborg.OFF)
+  #  ledborg.setColour(ledborg.OFF)
 
     while(True):
         server.handle_request()
@@ -256,6 +256,6 @@ except KeyboardInterrupt:
     log("Shutting down...")
     logFile.close()
     server.socket.close()
-    feeder.shutdown()
-    ledborg.setColour(ledborg.OFF)
-    GPIO.cleanup()
+  #  feeder.shutdown()
+  #  ledborg.setColour(ledborg.OFF)
+ #   GPIO.cleanup()
